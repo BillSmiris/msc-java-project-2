@@ -7,9 +7,11 @@ import com.google.gson.reflect.TypeToken;
 import java.net.ProxySelector;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class DbProvider {
 
@@ -98,17 +100,22 @@ public class DbProvider {
                 }
 
                 preparedStatement.close();
-                allProducts = allProducts.;
-
-                return allProducts;
             }
 
             statement.close();
             connection.close();
             System.out.println("Done!");
+
+            return new ArrayList<>(allProducts
+                    .stream()
+                    .collect(Collectors.toMap(Product::getProductCode, p -> p, (p1, p2) -> p1))
+                    .values());
+
         } catch (SQLException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        return Collections.emptyList();
     }
 
     private static void selectBlock(){
