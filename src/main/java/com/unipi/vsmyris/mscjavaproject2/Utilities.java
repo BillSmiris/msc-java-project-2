@@ -19,20 +19,20 @@ public class Utilities {
 
     public static void searchOccurrencesInSameBlock(List<Product> products){
         Product product = null;
-        for(int i = 0; i < products.size(); i++) {
+        int productListSize =  products.size();
+        for(int i = 0; i < productListSize; i++) {
             product = products.get(i);
-            for (int j = i; j > 0; j--) { //check for occurrence in new block
-                if (product.getProductCode().equals(products.get(j - 1).getProductCode())) {
-                    product.setPreviousEntryNumber(products.get(j - 1).getNumber());
+            for (int j = i - 1; j > -1; j--) { //check for occurrence in new block
+                if (product.getProductCode().equals(products.get(j).getProductCode())) {
+                    product.setPreviousEntryNumber(products.get(j).getNumber());
                     break;
                 }
             }
         }
     }
 
-    public static void searchOccurrencesInBlockchain(List<Product> initialBlockProducts, String initialBlockPreviousHash, Connection connection, List<Product> products){
+    public static void searchOccurrencesInBlockchain(List<Product> initialBlockProducts, String initialBlockPreviousHash, Connection connection, List<Product> products, Gson gson){
         try(PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM Blocks WHERE hash = ?")){
-            Gson gson = new Gson();
             int productListSize = products.size();
             int done = 0;
             List<Product> currentBlockProducts = initialBlockProducts;
@@ -42,9 +42,9 @@ public class Utilities {
             while(done < productListSize){
                 for(Product product : products){
                     if(product.getPreviousEntryNumber() == 0) {
-                        Product lastOccurrenceInBlock = currentBlockProducts.stream().filter(p -> p.getProductCode().equals(product.getProductCode())).toList().getLast();
-                        if(lastOccurrenceInBlock != null){
-                            product.setPreviousEntryNumber(lastOccurrenceInBlock.getPreviousEntryNumber());
+                        List<Product> occurrencesInBlock = currentBlockProducts.stream().filter(p -> p.getProductCode().equals(product.getProductCode())).toList();
+                        if(!occurrencesInBlock.isEmpty()){
+                            product.setPreviousEntryNumber(occurrencesInBlock.get(0).getNumber());
                             done++;
                         }
                     }
@@ -59,7 +59,7 @@ public class Utilities {
                     currentBlockPreviousHash = rs.getString("previousHash");
                 }
                 else{
-                    return;
+                    break;
                 }
             }
         } catch (SQLException e) {

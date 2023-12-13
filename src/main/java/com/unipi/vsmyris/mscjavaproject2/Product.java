@@ -15,7 +15,7 @@ public class Product {
     private String category;
     private int previousEntryNumber;
 
-    public Product(int number, String productCode, String title, float price, String description, String category) {
+    public Product(String productCode, String title, float price, String description, String category) {
         this.number = 0;
         this.productCode = productCode;
         this.title = title;
@@ -65,5 +65,16 @@ public class Product {
 
     public void setPreviousEntryNumber(int previousEntryNumber) {
         this.previousEntryNumber = previousEntryNumber;
+    }
+
+    @Override
+    public String toString(){
+        return "Entry Number: " + number +
+                "\nProduct Code: " + productCode +
+                "\nTitle: " + title +
+                "\nPrice: " + price +
+                "\nDescription: " + description +
+                "\nCategory: " + category +
+                "\nPrevious Entry Number: " + previousEntryNumber;
     }
 }
