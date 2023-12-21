@@ -85,7 +85,7 @@ public class Main extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();
-                new NewProductForm(3);
+                new NumberOfEntriesForm();
             }
         });
     }
@@ -106,7 +106,9 @@ public class Main extends JFrame {
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, product.getProductCode());
+                //JOptionPane.showMessageDialog(null, product.getProductCode());
+                dispose();
+                new ProductDetailsForm(product);
             }
         });
 
@@ -126,6 +128,9 @@ public class Main extends JFrame {
     }
 
     public static void main(String[] args) {
-        new Main();
+        Main main = new Main();
+
+        //System.out.println("dddd");
+        //main.dbProvider.close();
     }
 }
