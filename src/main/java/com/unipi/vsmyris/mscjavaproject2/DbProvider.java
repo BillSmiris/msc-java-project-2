@@ -1,11 +1,9 @@
 package com.unipi.vsmyris.mscjavaproject2;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.util.LinkedHashMap;
 
-import java.net.ProxySelector;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -94,7 +92,7 @@ public class DbProvider implements AutoCloseable{
 
             System.out.println("Done!");
         } catch (SQLException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Mainc.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -127,7 +125,7 @@ public class DbProvider implements AutoCloseable{
                     .values());
 
         } catch (SQLException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Mainc.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return Collections.emptyList();
@@ -162,7 +160,7 @@ public class DbProvider implements AutoCloseable{
 
             System.out.println("Done!");
         } catch (SQLException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Mainc.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return productToReturn;
@@ -190,7 +188,7 @@ public class DbProvider implements AutoCloseable{
             }
 
         } catch (SQLException ex){
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Mainc.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return productHistory;
@@ -209,7 +207,7 @@ public class DbProvider implements AutoCloseable{
             connection.close();
             System.out.println("Done!");
         } catch (SQLException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Mainc.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -219,7 +217,7 @@ public class DbProvider implements AutoCloseable{
         try {
             connection = DriverManager.getConnection(connectionString);
         } catch (SQLException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Mainc.class.getName()).log(Level.SEVERE, null, ex);
         }
         return connection;
     }
@@ -247,7 +245,7 @@ public class DbProvider implements AutoCloseable{
             }
 
         } catch (SQLException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Mainc.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

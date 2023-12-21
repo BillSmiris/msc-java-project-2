@@ -1,6 +1,6 @@
 ----------------------------------------------------------------
-Wed Dec 13 19:22:33 EET 2023:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.15.2.0 - (1873585): instance a816c00e-018c-6433-9c79-00000f51dba0 
+Thu Dec 21 03:10:34 EET 2023:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.15.2.0 - (1873585): instance a816c00e-018c-89ec-9ba8-00000f03a3c0 
 on database directory C:\Users\billy\Documents\Msc\prohgmena_themata_java\01_projects\2\source\msc-java-project-2\mscjavaproject2 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@76ed5528 
 Loaded from file:/C:/Users/billy/.m2/repository/org/apache/derby/derby/10.15.2.0/derby-10.15.2.0.jar
 java.vendor=Oracle Corporation
