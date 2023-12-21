@@ -14,9 +14,13 @@ public class Main extends JFrame {
     private JButton resetProductsBtn;
     private JButton addManyProductsButton;
     private JScrollPane productScrollPane;
+    private JRadioButton lastEntryRadioButton;
+    private JRadioButton firstEntryRadioButton;
     private JPanel productListPanel;
     private DbProvider dbProvider;
     private List<Product> products;
+    private boolean lastEntry;
+    private ButtonGroup buttonGroup;
 
     public Main(){
         setContentPane(mainPanel);
@@ -26,6 +30,12 @@ public class Main extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
 
+        lastEntry = true;
+        buttonGroup = new ButtonGroup();
+        buttonGroup.add(lastEntryRadioButton);
+        buttonGroup.add(firstEntryRadioButton);
+        lastEntryRadioButton.setSelected(true);
+
         //populate scrollpane
         dbProvider = DbProvider.getInstance();
         products = dbProvider.selectAll();
@@ -34,7 +44,7 @@ public class Main extends JFrame {
         productListPanel.setLayout(new BoxLayout(productListPanel, BoxLayout.Y_AXIS));
 
         for(Product product : products){
-            productListPanel.add(createProductPanel(product));
+            productListPanel.add(createProductPanel(product, false));
         }
 
         productScrollPane.setViewportView(productListPanel);
@@ -43,10 +53,10 @@ public class Main extends JFrame {
         searchProductBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Product result = dbProvider.searchProduct(searchTermField.getText(), true);
+                Product result = dbProvider.searchProduct(searchTermField.getText(), lastEntry);
                 productListPanel.removeAll();
                 if(result != null){
-                    productListPanel.add(createProductPanel(result));
+                    productListPanel.add(createProductPanel(result, true));
                 }
                 else {
                     productListPanel.add(new JLabel("No results"));
@@ -63,7 +73,7 @@ public class Main extends JFrame {
                 productListPanel.removeAll();
                 products = dbProvider.selectAll();
                 for(Product product : products){
-                    productListPanel.add(createProductPanel(product));
+                    productListPanel.add(createProductPanel(product, false));
                 }
 
                 productListPanel.revalidate();
@@ -88,9 +98,24 @@ public class Main extends JFrame {
                 new NumberOfEntriesForm();
             }
         });
+
+        //radio button event listeners
+        lastEntryRadioButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                lastEntry = true;
+            }
+        });
+
+        firstEntryRadioButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                lastEntry = false;
+            }
+        });
     }
 
-    private JPanel createProductPanel(Product product){
+    private JPanel createProductPanel(Product product, boolean search){
         JPanel productPanel = new JPanel();
         productPanel.setLayout(new BoxLayout(productPanel, BoxLayout.Y_AXIS));
 
@@ -103,14 +128,25 @@ public class Main extends JFrame {
 
         JButton button = new JButton();
         button.setText("View");
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                //JOptionPane.showMessageDialog(null, product.getProductCode());
-                dispose();
-                new ProductDetailsForm(product);
-            }
-        });
+
+        if(search){
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    dispose();
+                    new ProductDetailsForm(product, lastEntry);
+                }
+            });
+        }
+        else{
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    dispose();
+                    new ProductDetailsForm(product, true);
+                }
+            });
+        }
 
         productPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 125));
         productPanel.add(Box.createHorizontalStrut(5));
@@ -130,7 +166,7 @@ public class Main extends JFrame {
     public static void main(String[] args) {
         Main main = new Main();
 
-        //System.out.println("dddd");
+        System.out.println("dddd");
         //main.dbProvider.close();
     }
 }

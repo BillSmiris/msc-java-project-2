@@ -13,9 +13,11 @@ public class PriceHistoryForm extends JFrame{
     private Product product;
     private DbProvider dbProvider;
     private JTable priceHistoryTable;
+    private boolean lastEntry;
 
-    public PriceHistoryForm(Product product){
+    public PriceHistoryForm(Product product, boolean lastEntry){
         this.product = product;
+        this.lastEntry = lastEntry;
         dbProvider = DbProvider.getInstance();
 
         setContentPane(mainPanel);
@@ -50,7 +52,7 @@ public class PriceHistoryForm extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();
-                new ProductDetailsForm(product);
+                new ProductDetailsForm(product, lastEntry);
             }
         });
     }

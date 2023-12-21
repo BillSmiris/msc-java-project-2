@@ -17,13 +17,28 @@ public class ProductDetailsForm extends JFrame{
     private JLabel category;
     private JLabel previousEntryNumber;
     private JLabel productTitle;
+    private JRadioButton lastEntryRadioButton;
+    private JRadioButton firstEntryRadioButton;
     private Product product;
-
+    private boolean lastEntry;
     private DbProvider dbProvider;
+    private ButtonGroup buttonGroup;
 
-    public ProductDetailsForm(Product product){
-        this.product = product;
+    public ProductDetailsForm(Product productArg, boolean lastEntryArg){
+        product = productArg;
+        lastEntry = lastEntryArg;
         dbProvider = DbProvider.getInstance();
+
+        buttonGroup = new ButtonGroup();
+        buttonGroup.add(lastEntryRadioButton);
+        buttonGroup.add(firstEntryRadioButton);
+
+        if(lastEntry){
+            lastEntryRadioButton.setSelected(true);
+        }
+        else{
+            firstEntryRadioButton.setSelected(true);
+        }
 
         setContentPane(mainPanel);
         setTitle("Product Details");
@@ -47,7 +62,26 @@ public class ProductDetailsForm extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();
-                new PriceHistoryForm(product);
+                new PriceHistoryForm(product, lastEntry);
+            }
+        });
+
+        //radio button event listeners
+        lastEntryRadioButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                lastEntry = true;
+                product = dbProvider.searchProduct(product.getProductCode(), lastEntry);
+                SetProductDetails(product);
+            }
+        });
+
+        firstEntryRadioButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                lastEntry = false;
+                product = dbProvider.searchProduct(product.getProductCode(), lastEntry);
+                SetProductDetails(product);
             }
         });
     }
