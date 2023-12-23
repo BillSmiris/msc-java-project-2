@@ -1,6 +1,8 @@
 package com.unipi.vsmyris.mscjavaproject2;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -59,6 +61,7 @@ public class NewProductForm extends JFrame{
                 if(caret == 1){
                     previousBtn.setEnabled(false);
                 }
+                nextOrCreateBtn.setEnabled(true);
             }
         });
 
@@ -92,6 +95,65 @@ public class NewProductForm extends JFrame{
                 else{
                     populateForm(newProductList.get(caret - 1));
                 }
+
+                nextOrCreateBtn.setEnabled(validateForm());
+            }
+        });
+
+        //textbox change listeners
+        productCodeField.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                nextOrCreateBtn.setEnabled(validateForm());
+            }
+            public void removeUpdate(DocumentEvent e) {
+                nextOrCreateBtn.setEnabled(validateForm());
+            }
+            public void insertUpdate(DocumentEvent e) {
+                nextOrCreateBtn.setEnabled(validateForm());
+            }
+        });
+        titleField.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                nextOrCreateBtn.setEnabled(validateForm());
+            }
+            public void removeUpdate(DocumentEvent e) {
+                nextOrCreateBtn.setEnabled(validateForm());
+            }
+            public void insertUpdate(DocumentEvent e) {
+                nextOrCreateBtn.setEnabled(validateForm());
+            }
+        });
+        priceField.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                nextOrCreateBtn.setEnabled(validateForm());
+            }
+            public void removeUpdate(DocumentEvent e) {
+                nextOrCreateBtn.setEnabled(validateForm());
+            }
+            public void insertUpdate(DocumentEvent e) {
+                nextOrCreateBtn.setEnabled(validateForm());
+            }
+        });
+        descriptionField.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                nextOrCreateBtn.setEnabled(validateForm());
+            }
+            public void removeUpdate(DocumentEvent e) {
+                nextOrCreateBtn.setEnabled(validateForm());
+            }
+            public void insertUpdate(DocumentEvent e) {
+                nextOrCreateBtn.setEnabled(validateForm());
+            }
+        });
+        categoryField.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                nextOrCreateBtn.setEnabled(validateForm());
+            }
+            public void removeUpdate(DocumentEvent e) {
+                nextOrCreateBtn.setEnabled(validateForm());
+            }
+            public void insertUpdate(DocumentEvent e) {
+                nextOrCreateBtn.setEnabled(validateForm());
             }
         });
     }
@@ -113,12 +175,28 @@ public class NewProductForm extends JFrame{
     }
 
     private Product newProductFromForm(){
-        String productCode = productCodeField.getText();
-        String title = titleField.getText();
-        float price = Float.parseFloat(priceField.getText());
-        String description = descriptionField.getText();
-        String category = categoryField.getText();
+        String productCode = productCodeField.getText().trim();
+        String title = titleField.getText().trim();
+        float price = Float.parseFloat(priceField.getText().trim());
+        String description = descriptionField.getText().trim();
+        String category = categoryField.getText().trim();
 
         return new Product(productCode, title, price, description, category);
+    }
+
+    private boolean validateForm(){
+        boolean productCodeValid = !productCodeField.getText().trim().isEmpty();
+        boolean titleValid = !titleField.getText().trim().isEmpty();
+        boolean priceValid = !priceField.getText().trim().isEmpty();
+        try{
+            Float.parseFloat(priceField.getText().trim());
+        }
+        catch (Exception e){
+            priceValid = false;
+        }
+        boolean descriptionValid = !descriptionField.getText().trim().isEmpty();
+        boolean categoryValid = !categoryField.getText().trim().isEmpty();
+
+        return productCodeValid && titleValid && priceValid && descriptionValid && categoryValid;
     }
 }
