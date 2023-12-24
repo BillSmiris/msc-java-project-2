@@ -8,6 +8,8 @@ import java.util.List;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main extends JFrame {
     private JTextField searchTermField;
@@ -24,6 +26,7 @@ public class Main extends JFrame {
     private boolean lastEntry;
     private ButtonGroup buttonGroup;
     private static DbProvider dbProvider = DbProvider.getInstance();
+    public static ExecutorService executorService = Executors.newFixedThreadPool(1);
 
     public Main(){
         setContentPane(mainPanel);
@@ -177,6 +180,7 @@ public class Main extends JFrame {
 
     public static void cleanup(){
         dbProvider.close();
+        executorService.shutdown();
     }
 
     public static void main(String[] args) {
