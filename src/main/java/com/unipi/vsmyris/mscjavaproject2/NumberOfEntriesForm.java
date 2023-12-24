@@ -3,6 +3,8 @@ package com.unipi.vsmyris.mscjavaproject2;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class NumberOfEntriesForm extends JFrame {
     private JPanel mainPanel;
@@ -76,6 +78,16 @@ public class NumberOfEntriesForm extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 numberOfEntries = 5;
+            }
+        });
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (e.getSource() instanceof JFrame) {
+                    // User clicked the close button
+                    Main.cleanup();
+                }
             }
         });
     }

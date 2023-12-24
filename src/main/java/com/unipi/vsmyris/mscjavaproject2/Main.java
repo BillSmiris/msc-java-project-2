@@ -5,6 +5,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 public class Main extends JFrame {
     private JTextField searchTermField;
@@ -17,10 +20,10 @@ public class Main extends JFrame {
     private JRadioButton lastEntryRadioButton;
     private JRadioButton firstEntryRadioButton;
     private JPanel productListPanel;
-    private DbProvider dbProvider;
     private List<Product> products;
     private boolean lastEntry;
     private ButtonGroup buttonGroup;
+    private static DbProvider dbProvider = DbProvider.getInstance();
 
     public Main(){
         setContentPane(mainPanel);
@@ -37,7 +40,6 @@ public class Main extends JFrame {
         lastEntryRadioButton.setSelected(true);
 
         //populate scrollpane
-        dbProvider = DbProvider.getInstance();
         products = dbProvider.selectAll();
 
         productListPanel = new JPanel();
@@ -113,6 +115,16 @@ public class Main extends JFrame {
                 lastEntry = false;
             }
         });
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (e.getSource() instanceof JFrame) {
+                    // User clicked the close button
+                    cleanup();
+                }
+            }
+        });
     }
 
     private JPanel createProductPanel(Product product, boolean search){
@@ -163,10 +175,11 @@ public class Main extends JFrame {
         return productPanel;
     }
 
-    public static void main(String[] args) {
-        Main main = new Main();
+    public static void cleanup(){
+        dbProvider.close();
+    }
 
-        System.out.println("dddd");
-        //main.dbProvider.close();
+    public static void main(String[] args) {
+        new Main();
     }
 }

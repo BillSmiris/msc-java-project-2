@@ -5,6 +5,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -154,6 +156,16 @@ public class NewProductForm extends JFrame{
             }
             public void insertUpdate(DocumentEvent e) {
                 nextOrCreateBtn.setEnabled(validateForm());
+            }
+        });
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (e.getSource() instanceof JFrame) {
+                    // User clicked the close button
+                    Main.cleanup();
+                }
             }
         });
     }

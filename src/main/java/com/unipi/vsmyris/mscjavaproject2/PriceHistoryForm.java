@@ -3,6 +3,8 @@ package com.unipi.vsmyris.mscjavaproject2;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Date;
 import java.util.List;
 
@@ -53,6 +55,16 @@ public class PriceHistoryForm extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 dispose();
                 new ProductDetailsForm(product, lastEntry);
+            }
+        });
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (e.getSource() instanceof JFrame) {
+                    // User clicked the close button
+                    Main.cleanup();
+                }
             }
         });
     }

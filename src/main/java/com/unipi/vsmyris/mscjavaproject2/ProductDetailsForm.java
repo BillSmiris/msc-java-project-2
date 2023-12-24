@@ -3,6 +3,8 @@ package com.unipi.vsmyris.mscjavaproject2;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Date;
 
 public class ProductDetailsForm extends JFrame{
@@ -82,6 +84,16 @@ public class ProductDetailsForm extends JFrame{
                 lastEntry = false;
                 product = dbProvider.searchProduct(product.getProductCode(), lastEntry);
                 SetProductDetails(product);
+            }
+        });
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (e.getSource() instanceof JFrame) {
+                    // User clicked the close button
+                    Main.cleanup();
+                }
             }
         });
     }
