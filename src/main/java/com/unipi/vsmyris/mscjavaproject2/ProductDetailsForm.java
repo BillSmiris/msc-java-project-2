@@ -23,13 +23,11 @@ public class ProductDetailsForm extends JFrame{
     private JRadioButton firstEntryRadioButton;
     private Product product;
     private boolean lastEntry;
-    private DbProvider dbProvider;
     private ButtonGroup buttonGroup;
 
     public ProductDetailsForm(Product productArg, boolean lastEntryArg){
         product = productArg;
         lastEntry = lastEntryArg;
-        dbProvider = DbProvider.getInstance();
 
         buttonGroup = new ButtonGroup();
         buttonGroup.add(lastEntryRadioButton);
@@ -55,6 +53,7 @@ public class ProductDetailsForm extends JFrame{
         backBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                Main.retrievalFuture.cancel(true);
                 dispose();
                 new Main();
             }
@@ -63,6 +62,7 @@ public class ProductDetailsForm extends JFrame{
         priceHistoryBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                Main.retrievalFuture.cancel(true);
                 dispose();
                 new PriceHistoryForm(product, lastEntry);
             }
@@ -72,18 +72,24 @@ public class ProductDetailsForm extends JFrame{
         lastEntryRadioButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                lastEntry = true;
-                product = dbProvider.searchProduct(product.getProductCode(), lastEntry);
-                SetProductDetails(product);
+                Main.retrievalFuture.cancel(true);
+                Main.retrievalFuture = Main.retrievalExecutorService.submit(() -> {
+                    product = Main.dbProvider.searchProduct(product.getProductCode(), true);
+                    lastEntry = true;
+                    SetProductDetails(product);
+                });
             }
         });
 
         firstEntryRadioButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                lastEntry = false;
-                product = dbProvider.searchProduct(product.getProductCode(), lastEntry);
-                SetProductDetails(product);
+                Main.retrievalFuture.cancel(true);
+                Main.retrievalFuture = Main.retrievalExecutorService.submit(() -> {
+                    product = Main.dbProvider.searchProduct(product.getProductCode(), false);
+                    lastEntry = false;
+                    SetProductDetails(product);
+                });
             }
         });
 

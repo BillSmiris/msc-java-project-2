@@ -24,10 +24,8 @@ public class NewProductForm extends JFrame{
     private int caret;
     private int maxCaret;
     private List<Product> newProductList;
-    private DbProvider dbProvider;
 
     public NewProductForm(int numberOfEntries){
-        dbProvider = DbProvider.getInstance();
         newProductList = new ArrayList<>();
         this.numberOfEntries = numberOfEntries;
         caret = 1;
@@ -81,8 +79,10 @@ public class NewProductForm extends JFrame{
                 }
 
                 if(caret == numberOfEntries){
-
-                    dbProvider.insertNewBlock(newProductList);
+                    Main.miningExecutorService.execute(() -> {
+                        Main.dbProvider.insertNewBlock(newProductList);
+                        JOptionPane.showMessageDialog(null, "Block created!");
+                    });
                     dispose();
                     new Main();
                 }

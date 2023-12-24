@@ -13,14 +13,12 @@ public class PriceHistoryForm extends JFrame{
     private JScrollPane priceHisotryScrollPane;
     private JButton backBtn;
     private Product product;
-    private DbProvider dbProvider;
     private JTable priceHistoryTable;
     private boolean lastEntry;
 
     public PriceHistoryForm(Product product, boolean lastEntry){
         this.product = product;
         this.lastEntry = lastEntry;
-        dbProvider = DbProvider.getInstance();
 
         setContentPane(mainPanel);
         setTitle("Price History");
@@ -29,30 +27,33 @@ public class PriceHistoryForm extends JFrame{
         setLocationRelativeTo(null);
         setVisible(true);
 
-        List<Product> priceHistory = dbProvider.getPriceHistory(product.getProductCode());
+        priceHisotryScrollPane.setViewportView(new JLabel("Loading..."));
 
-        priceHistoryTable = new JTable(priceHistory.size(), 2);
-        priceHistoryTable.getColumnModel().getColumn(0).setHeaderValue("Date");
-        priceHistoryTable.getColumnModel().getColumn(1).setHeaderValue("Price");
+        Main.retrievalFuture = Main.retrievalExecutorService.submit(() -> {
+            List<Product> priceHistory = Main.dbProvider.getPriceHistory(product.getProductCode());
 
+            priceHistoryTable = new JTable(priceHistory.size(), 2);
+            priceHistoryTable.getColumnModel().getColumn(0).setHeaderValue("Date");
+            priceHistoryTable.getColumnModel().getColumn(1).setHeaderValue("Price");
 
+            int i = 0;
+            for(Product p : priceHistory){
+                priceHistoryTable.setValueAt((new Date(p.getTimestamp())).toString(), i, 0);
+                priceHistoryTable.setValueAt(String.valueOf(p.getPrice()), i, 1);
+                i++;
+            }
 
-        int i = 0;
-        for(Product p : priceHistory){
-            priceHistoryTable.setValueAt((new Date(p.getTimestamp())).toString(), i, 0);
-            priceHistoryTable.setValueAt(String.valueOf(p.getPrice()), i, 1);
-            i++;
-        }
+            priceHisotryScrollPane.setViewportView(priceHistoryTable);
 
-        priceHisotryScrollPane.setViewportView(priceHistoryTable);
-
-        priceHisotryScrollPane.revalidate();
-        priceHisotryScrollPane.repaint();
+            priceHisotryScrollPane.revalidate();
+            priceHisotryScrollPane.repaint();
+        });
 
         //btn event listeners
         backBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                Main.retrievalFuture.cancel(true);
                 dispose();
                 new ProductDetailsForm(product, lastEntry);
             }
