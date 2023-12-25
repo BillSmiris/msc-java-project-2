@@ -29,10 +29,8 @@ public class Main extends JFrame {
     public static DbProvider dbProvider = DbProvider.getInstance();
     public static List<Runnable> miningTaskList = new ArrayList<>();
     public static Thread miningThread = new Thread(Main::miningThreadJob);
-    public static Thread retrievalThread = null;
     public static final Object monitor = new Object();
     public static ReentrantLock miningLock = new ReentrantLock();
-    public static ReentrantLock retrievalLock = new ReentrantLock();
 
     public Main(){
         setContentPane(mainPanel);
@@ -55,69 +53,51 @@ public class Main extends JFrame {
         productListPanel.add(new JLabel("Loading..."));
         productScrollPane.setViewportView(productListPanel);
 
-        startRetrievalThread(new Runnable() {
-            @Override
-            public void run() {
-                products = dbProvider.selectAll();
-                productListPanel.removeAll();
-                for(Product product : products){
-                    productListPanel.add(createProductPanel(product, false));
-                }
-                productListPanel.revalidate();
-                productListPanel.repaint();
-            }
-        });
+        products = dbProvider.selectAll();
+        productListPanel.removeAll();
+        for(Product product : products){
+            productListPanel.add(createProductPanel(product, false));
+        }
+        productListPanel.revalidate();
+        productListPanel.repaint();
 
         //btn events
         searchProductBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                interruptRetrievalThread();
-                startRetrievalThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Product result = dbProvider.searchProduct(searchTermField.getText(), lastEntry);
-                        productListPanel.removeAll();
-                        if(result != null){
-                            productListPanel.add(createProductPanel(result, true));
-                        }
-                        else {
-                            productListPanel.add(new JLabel("No results"));
-                        }
+                Product result = dbProvider.searchProduct(searchTermField.getText(), lastEntry);
+                productListPanel.removeAll();
+                if(result != null){
+                    productListPanel.add(createProductPanel(result, true));
+                }
+                else {
+                    productListPanel.add(new JLabel("No results"));
+                }
 
-                        productListPanel.revalidate();
-                        productListPanel.repaint();
-                    }
-                });
+                productListPanel.revalidate();
+                productListPanel.repaint();
             }
         });
 
         resetProductsBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                interruptRetrievalThread();
-                startRetrievalThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        productListPanel.removeAll();
-                        products = dbProvider.selectAll();
-                        for(Product product : products){
-                            productListPanel.add(createProductPanel(product, false));
-                        }
+                productListPanel.removeAll();
+                products = dbProvider.selectAll();
+                for(Product product : products){
+                    productListPanel.add(createProductPanel(product, false));
+                }
 
-                        productListPanel.revalidate();
-                        productListPanel.repaint();
+                productListPanel.revalidate();
+                productListPanel.repaint();
 
-                        searchTermField.setText("");
-                    }
-                });
+                searchTermField.setText("");
             }
         });
 
         addProductBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                interruptRetrievalThread();
                 dispose();
                 new NewProductForm(1);
             }
@@ -126,7 +106,6 @@ public class Main extends JFrame {
         addManyProductsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                interruptRetrievalThread();
                 dispose();
                 new NumberOfEntriesForm();
             }
@@ -230,28 +209,5 @@ public class Main extends JFrame {
                 throw new RuntimeException(e);
             }
         }
-    }
-
-    public static void interruptRetrievalThread(){
-        if(retrievalThread != null){
-            retrievalThread.interrupt();
-        }
-    }
-
-    public static void startRetrievalThread(Runnable runnable){
-        retrievalThread = new Thread(() -> {
-            retrievalLock.lock();
-            try {
-                sleep(2000);
-            } catch (InterruptedException e) {
-                return;
-            }
-
-            runnable.run();
-
-            retrievalLock.unlock();
-            retrievalThread = null;
-        });
-        retrievalThread.start();
     }
 }
