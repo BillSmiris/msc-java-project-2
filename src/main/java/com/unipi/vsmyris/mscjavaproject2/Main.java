@@ -8,8 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static java.lang.Thread.sleep;
 
 public class Main extends JFrame {
     private JTextField searchTermField;
@@ -28,8 +29,10 @@ public class Main extends JFrame {
     public static DbProvider dbProvider = DbProvider.getInstance();
     public static List<Runnable> miningTaskList = new ArrayList<>();
     public static Thread miningThread = new Thread(Main::miningThreadJob);
+    public static Thread retrievalThread = null;
     public static final Object monitor = new Object();
-    public static ReentrantLock lock = new ReentrantLock();
+    public static ReentrantLock miningLock = new ReentrantLock();
+    public static ReentrantLock retrievalLock = new ReentrantLock();
 
     public Main(){
         setContentPane(mainPanel);
@@ -49,53 +52,72 @@ public class Main extends JFrame {
 
         productListPanel = new JPanel();
         productListPanel.setLayout(new BoxLayout(productListPanel, BoxLayout.Y_AXIS));
+        productListPanel.add(new JLabel("Loading..."));
 
-        productScrollPane.setViewportView(productListPanel);
-        products = dbProvider.selectAll();
-        productListPanel.removeAll();
-        for(Product product : products){
-            productListPanel.add(createProductPanel(product, false));
-        }
-        productListPanel.revalidate();
-        productListPanel.repaint();
+        startRetrievalThread(new Runnable() {
+            @Override
+            public void run() {
+                productScrollPane.setViewportView(productListPanel);
+                products = dbProvider.selectAll();
+                productListPanel.removeAll();
+                for(Product product : products){
+                    productListPanel.add(createProductPanel(product, false));
+                }
+                productListPanel.revalidate();
+                productListPanel.repaint();
+            }
+        });
 
         //btn events
         searchProductBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Product result = dbProvider.searchProduct(searchTermField.getText(), lastEntry);
-                productListPanel.removeAll();
-                if(result != null){
-                    productListPanel.add(createProductPanel(result, true));
-                }
-                else {
-                    productListPanel.add(new JLabel("No results"));
-                }
+                interruptRetrievalThread();
+                startRetrievalThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Product result = dbProvider.searchProduct(searchTermField.getText(), lastEntry);
+                        productListPanel.removeAll();
+                        if(result != null){
+                            productListPanel.add(createProductPanel(result, true));
+                        }
+                        else {
+                            productListPanel.add(new JLabel("No results"));
+                        }
 
-                productListPanel.revalidate();
-                productListPanel.repaint();
+                        productListPanel.revalidate();
+                        productListPanel.repaint();
+                    }
+                });
             }
         });
 
         resetProductsBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                productListPanel.removeAll();
-                products = dbProvider.selectAll();
-                for(Product product : products){
-                    productListPanel.add(createProductPanel(product, false));
-                }
+                interruptRetrievalThread();
+                startRetrievalThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        productListPanel.removeAll();
+                        products = dbProvider.selectAll();
+                        for(Product product : products){
+                            productListPanel.add(createProductPanel(product, false));
+                        }
 
-                productListPanel.revalidate();
-                productListPanel.repaint();
+                        productListPanel.revalidate();
+                        productListPanel.repaint();
 
-                searchTermField.setText("");
+                        searchTermField.setText("");
+                    }
+                });
             }
         });
 
         addProductBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                interruptRetrievalThread();
                 dispose();
                 new NewProductForm(1);
             }
@@ -104,6 +126,7 @@ public class Main extends JFrame {
         addManyProductsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                interruptRetrievalThread();
                 dispose();
                 new NumberOfEntriesForm();
             }
@@ -193,7 +216,7 @@ public class Main extends JFrame {
     }
 
     private static void miningThreadJob(){
-        lock.lock();
+        miningLock.lock();
         while (true) {
             try {
                 if (miningTaskList.isEmpty()) {
@@ -207,5 +230,28 @@ public class Main extends JFrame {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public static void interruptRetrievalThread(){
+        if(retrievalThread != null){
+            retrievalThread.interrupt();
+        }
+    }
+
+    public static void startRetrievalThread(Runnable runnable){
+        retrievalThread = new Thread(() -> {
+            retrievalLock.lock();
+            try {
+                sleep(5000);
+            } catch (InterruptedException e) {
+                return;
+            }
+
+            runnable.run();
+
+            retrievalLock.unlock();
+            retrievalThread = null;
+        });
+        retrievalThread.start();
     }
 }
