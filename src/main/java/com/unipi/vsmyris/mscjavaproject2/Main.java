@@ -33,7 +33,6 @@ public class Main extends JFrame {
     public static DbProvider dbProvider = DbProvider.getInstance();
     public static List<Runnable> miningTaskList = new ArrayList<>();
     public static Thread miningThread = new Thread(Main::miningThreadJob);
-
     public static final Object monitor = new Object();
     public static ReentrantLock lock = new ReentrantLock();
 
