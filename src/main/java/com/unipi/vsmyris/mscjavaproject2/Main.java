@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -11,6 +12,7 @@ import java.awt.event.WindowListener;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.Thread.sleep;
 
@@ -29,9 +31,11 @@ public class Main extends JFrame {
     private boolean lastEntry;
     private ButtonGroup buttonGroup;
     public static DbProvider dbProvider = DbProvider.getInstance();
-    public static ExecutorService miningExecutorService = Executors.newSingleThreadExecutor();
-    public static ExecutorService retrievalExecutorService = Executors.newSingleThreadExecutor();
-    public static Future<?> retrievalFuture;
+    public static List<Runnable> miningTaskList = new ArrayList<>();
+    public static Thread miningThread = new Thread(Main::miningThreadJob);
+
+    public static final Object monitor = new Object();
+    public static ReentrantLock lock = new ReentrantLock();
 
     public Main(){
         setContentPane(mainPanel);
@@ -199,11 +203,27 @@ public class Main extends JFrame {
 
     public static void cleanup(){
         dbProvider.close();
-        miningExecutorService.shutdown();
-        retrievalExecutorService.shutdown();
     }
 
     public static void main(String[] args) {
         new Main();
+        miningThread.start();
+    }
+
+    private static void miningThreadJob(){
+        lock.lock();
+        while (true) {
+            try {
+                if (miningTaskList.isEmpty()) {
+                    synchronized (monitor){
+                        monitor.wait();
+                    }
+                }
+                Runnable r = miningTaskList.remove(0);
+                r.run();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
