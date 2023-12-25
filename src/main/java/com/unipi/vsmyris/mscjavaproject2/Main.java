@@ -30,9 +30,6 @@ public class Main extends JFrame {
     private ButtonGroup buttonGroup;
     public static DbProvider dbProvider = DbProvider.getInstance();
     public static ExecutorService miningExecutorService = Executors.newSingleThreadExecutor();
-    public static ExecutorService retrievalExecutorService = Executors.newSingleThreadExecutor();
-    public static Future<?> retrievalFuture;
-
     public Main(){
         setContentPane(mainPanel);
         setTitle("Product Manager");
@@ -54,61 +51,51 @@ public class Main extends JFrame {
         productListPanel.add(new JLabel("Loading..."));
 
         productScrollPane.setViewportView(productListPanel);
-
-        retrievalFuture = retrievalExecutorService.submit(() -> {
-            products = dbProvider.selectAll();
-            productListPanel.removeAll();
-            for(Product product : products){
-                productListPanel.add(createProductPanel(product, false));
-            }
-            productListPanel.revalidate();
-            productListPanel.repaint();
-        });
+        products = dbProvider.selectAll();
+        productListPanel.removeAll();
+        for(Product product : products){
+            productListPanel.add(createProductPanel(product, false));
+        }
+        productListPanel.revalidate();
+        productListPanel.repaint();
 
         //btn events
         searchProductBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                retrievalFuture.cancel(true);
-                retrievalFuture = retrievalExecutorService.submit(() -> {
-                    Product result = dbProvider.searchProduct(searchTermField.getText(), lastEntry);
-                    productListPanel.removeAll();
-                    if(result != null){
-                        productListPanel.add(createProductPanel(result, true));
-                    }
-                    else {
-                        productListPanel.add(new JLabel("No results"));
-                    }
+                Product result = dbProvider.searchProduct(searchTermField.getText(), lastEntry);
+                productListPanel.removeAll();
+                if(result != null){
+                    productListPanel.add(createProductPanel(result, true));
+                }
+                else {
+                    productListPanel.add(new JLabel("No results"));
+                }
 
-                    productListPanel.revalidate();
-                    productListPanel.repaint();
-                });
+                productListPanel.revalidate();
+                productListPanel.repaint();
             }
         });
 
         resetProductsBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                retrievalFuture.cancel(true);
-                retrievalFuture = retrievalExecutorService.submit(() -> {
-                    productListPanel.removeAll();
-                    products = dbProvider.selectAll();
-                    for(Product product : products){
-                        productListPanel.add(createProductPanel(product, false));
-                    }
+                productListPanel.removeAll();
+                products = dbProvider.selectAll();
+                for(Product product : products){
+                    productListPanel.add(createProductPanel(product, false));
+                }
 
-                    productListPanel.revalidate();
-                    productListPanel.repaint();
+                productListPanel.revalidate();
+                productListPanel.repaint();
 
-                    searchTermField.setText("");
-                });
+                searchTermField.setText("");
             }
         });
 
         addProductBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                retrievalFuture.cancel(true);
                 dispose();
                 new NewProductForm(1);
             }
@@ -117,7 +104,6 @@ public class Main extends JFrame {
         addManyProductsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                retrievalFuture.cancel(true);
                 dispose();
                 new NumberOfEntriesForm();
             }
@@ -200,7 +186,7 @@ public class Main extends JFrame {
     public static void cleanup(){
         dbProvider.close();
         miningExecutorService.shutdown();
-        retrievalExecutorService.shutdown();
+
     }
 
     public static void main(String[] args) {

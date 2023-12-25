@@ -53,7 +53,6 @@ public class ProductDetailsForm extends JFrame{
         backBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Main.retrievalFuture.cancel(true);
                 dispose();
                 new Main();
             }
@@ -62,7 +61,6 @@ public class ProductDetailsForm extends JFrame{
         priceHistoryBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Main.retrievalFuture.cancel(true);
                 dispose();
                 new PriceHistoryForm(product, lastEntry);
             }
@@ -72,24 +70,18 @@ public class ProductDetailsForm extends JFrame{
         lastEntryRadioButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Main.retrievalFuture.cancel(true);
-                Main.retrievalFuture = Main.retrievalExecutorService.submit(() -> {
-                    product = Main.dbProvider.searchProduct(product.getProductCode(), true);
-                    lastEntry = true;
-                    SetProductDetails(product);
-                });
+                product = Main.dbProvider.searchProduct(product.getProductCode(), true);
+                lastEntry = true;
+                SetProductDetails(product);
             }
         });
 
         firstEntryRadioButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Main.retrievalFuture.cancel(true);
-                Main.retrievalFuture = Main.retrievalExecutorService.submit(() -> {
-                    product = Main.dbProvider.searchProduct(product.getProductCode(), false);
-                    lastEntry = false;
-                    SetProductDetails(product);
-                });
+                product = Main.dbProvider.searchProduct(product.getProductCode(), false);
+                lastEntry = false;
+                SetProductDetails(product);
             }
         });
 
