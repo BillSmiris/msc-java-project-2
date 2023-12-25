@@ -53,11 +53,11 @@ public class Main extends JFrame {
         productListPanel = new JPanel();
         productListPanel.setLayout(new BoxLayout(productListPanel, BoxLayout.Y_AXIS));
         productListPanel.add(new JLabel("Loading..."));
+        productScrollPane.setViewportView(productListPanel);
 
         startRetrievalThread(new Runnable() {
             @Override
             public void run() {
-                productScrollPane.setViewportView(productListPanel);
                 products = dbProvider.selectAll();
                 productListPanel.removeAll();
                 for(Product product : products){
@@ -242,7 +242,7 @@ public class Main extends JFrame {
         retrievalThread = new Thread(() -> {
             retrievalLock.lock();
             try {
-                sleep(5000);
+                sleep(2000);
             } catch (InterruptedException e) {
                 return;
             }
