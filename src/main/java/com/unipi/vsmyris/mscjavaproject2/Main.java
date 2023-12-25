@@ -9,12 +9,7 @@ import java.util.List;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
-
-import static java.lang.Thread.sleep;
 
 public class Main extends JFrame {
     private JTextField searchTermField;
@@ -54,64 +49,53 @@ public class Main extends JFrame {
 
         productListPanel = new JPanel();
         productListPanel.setLayout(new BoxLayout(productListPanel, BoxLayout.Y_AXIS));
-        productListPanel.add(new JLabel("Loading..."));
 
         productScrollPane.setViewportView(productListPanel);
-
-        retrievalFuture = retrievalExecutorService.submit(() -> {
-            products = dbProvider.selectAll();
-            productListPanel.removeAll();
-            for(Product product : products){
-                productListPanel.add(createProductPanel(product, false));
-            }
-            productListPanel.revalidate();
-            productListPanel.repaint();
-        });
+        products = dbProvider.selectAll();
+        productListPanel.removeAll();
+        for(Product product : products){
+            productListPanel.add(createProductPanel(product, false));
+        }
+        productListPanel.revalidate();
+        productListPanel.repaint();
 
         //btn events
         searchProductBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                retrievalFuture.cancel(true);
-                retrievalFuture = retrievalExecutorService.submit(() -> {
-                    Product result = dbProvider.searchProduct(searchTermField.getText(), lastEntry);
-                    productListPanel.removeAll();
-                    if(result != null){
-                        productListPanel.add(createProductPanel(result, true));
-                    }
-                    else {
-                        productListPanel.add(new JLabel("No results"));
-                    }
+                Product result = dbProvider.searchProduct(searchTermField.getText(), lastEntry);
+                productListPanel.removeAll();
+                if(result != null){
+                    productListPanel.add(createProductPanel(result, true));
+                }
+                else {
+                    productListPanel.add(new JLabel("No results"));
+                }
 
-                    productListPanel.revalidate();
-                    productListPanel.repaint();
-                });
+                productListPanel.revalidate();
+                productListPanel.repaint();
             }
         });
 
         resetProductsBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                retrievalFuture.cancel(true);
-                retrievalFuture = retrievalExecutorService.submit(() -> {
-                    productListPanel.removeAll();
-                    products = dbProvider.selectAll();
-                    for(Product product : products){
-                        productListPanel.add(createProductPanel(product, false));
-                    }
+                productListPanel.removeAll();
+                products = dbProvider.selectAll();
+                for(Product product : products){
+                    productListPanel.add(createProductPanel(product, false));
+                }
 
-                    productListPanel.revalidate();
-                    productListPanel.repaint();
+                productListPanel.revalidate();
+                productListPanel.repaint();
 
-                    searchTermField.setText("");
-                });
+                searchTermField.setText("");
             }
         });
 
         addProductBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                retrievalFuture.cancel(true);
                 dispose();
                 new NewProductForm(1);
             }
@@ -120,7 +104,6 @@ public class Main extends JFrame {
         addManyProductsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                retrievalFuture.cancel(true);
                 dispose();
                 new NumberOfEntriesForm();
             }

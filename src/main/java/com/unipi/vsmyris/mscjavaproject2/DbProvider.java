@@ -78,7 +78,7 @@ public class DbProvider implements AutoCloseable{
 
             Block newBlock = new Block(previousHash, newBlockProducts);
 
-            newBlock.mineBlock(6);
+            newBlock.mineBlock(5);
 
             preparedStatement.setString(1, newBlock.getHash());
             preparedStatement.setString(2, newBlock.getPreviousHash());

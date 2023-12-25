@@ -79,16 +79,16 @@ public class NewProductForm extends JFrame{
                 }
 
                 if(caret == numberOfEntries){
-//                    Main.miningExecutorService.execute(() -> {
-//                        Main.dbProvider.insertNewBlock(newProductList);
-//                        JOptionPane.showMessageDialog(null, "Block created!");
-//                    });
                     Main.miningTaskList.add(new Runnable() {
                         @Override
                         public void run() {
-
+                            Main.dbProvider.insertNewBlock(newProductList);
+                            JOptionPane.showMessageDialog(null, "Block created!");
                         }
                     });
+                    synchronized (Main.monitor){
+                        Main.monitor.notify();
+                    }
                     dispose();
                     new Main();
                 }
