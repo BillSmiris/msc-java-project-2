@@ -45,34 +45,32 @@ public class Block {
     public String mineBlock(int prefix){
         String prefixString = new String(new char[prefix]).replace('\0','0');
         int numOfThreads = 6;
-        boolean hashIsValid = hash.substring(0,prefix).equals(prefixString);
-        String[] threadHashes = new String[numOfThreads];
-        int[] threadNonces = new int[numOfThreads];
-        Thread[] threads = new Thread[numOfThreads];
+        boolean[] hashIsValid = new boolean[]{hash.substring(0,prefix).equals(prefixString)};
+        Object monitor = new Object();
         int noncesPerThread = 1000;
         int startingNonce = 0;
-        while(!hashIsValid){
+        Thread[] threads = new Thread[numOfThreads];
+        while(!hashIsValid[0]){
             for(int i = 0; i < numOfThreads; i++){
-                int finalI = i;
                 int finalStartingNonce = startingNonce;
-                threads[finalI] = new Thread(() -> {
+                threads[i] = new Thread(() -> {
                     int localNonce = finalStartingNonce;
                     String currentHash;
-                    boolean found = false;
                     int limit = finalStartingNonce + noncesPerThread;
 
                     for(; localNonce < limit; localNonce++){
-                        currentHash = calculateBlockHash(localNonce);
-                        threadNonces[finalI] = localNonce;
-                        if(currentHash.substring(0,prefix).equals(prefixString)){
-                            threadHashes[finalI] = currentHash;
-                            threadNonces[finalI] = localNonce;
-                            found = true;
+                        if(hashIsValid[0]){
                             break;
                         }
-                    }
-                    if(!found){
-                        threadNonces[finalI] = -1;
+                        currentHash = calculateBlockHash(localNonce);
+                        if(currentHash.substring(0,prefix).equals(prefixString)){
+                            synchronized (monitor){
+                                hashIsValid[0] = true;
+                                hash = currentHash;
+                                nonce = localNonce;
+                            }
+                            break;
+                        }
                     }
                 });
                 startingNonce += noncesPerThread;
@@ -85,15 +83,6 @@ public class Block {
                     thread.join();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
-                }
-            }
-            //countDownLatch.await();
-            for(int i = 0; i < numOfThreads; i++){
-                if(threadNonces[i] > -1){
-                    nonce = threadNonces[i];
-                    hash = threadHashes[i];
-                    hashIsValid = true;
-                    break;
                 }
             }
         }
