@@ -21,12 +21,12 @@ public class Block {
         this.previousHash = previousHash;
         this.data = new GsonBuilder().setPrettyPrinting().create().toJson(data.reversed());
         this.timestamp = new Date().getTime();
-        this.hash = calculateBlockHash();
+        this.hash = calculateBlockHash(nonce);
     }
 
-    public String calculateBlockHash(){
+    public String calculateBlockHash(int localNonce){
         String dataToHash = previousHash+String.valueOf(timestamp)
-                +data+String.valueOf(nonce);
+                +data+String.valueOf(localNonce);
         MessageDigest digest = null;
         byte[] bytes = null;
         try {
@@ -44,9 +44,58 @@ public class Block {
 
     public String mineBlock(int prefix){
         String prefixString = new String(new char[prefix]).replace('\0','0');
-        while (!hash.substring(0,prefix).equals(prefixString)){
-            nonce++;
-            hash = calculateBlockHash();
+        int numOfThreads = 6;
+        boolean hashIsValid = hash.substring(0,prefix).equals(prefixString);
+        String[] threadHashes = new String[numOfThreads];
+        int[] threadNonces = new int[numOfThreads];
+        Thread[] threads = new Thread[numOfThreads];
+        int noncesPerThread = 1000;
+        int startingNonce = 0;
+        while(!hashIsValid){
+            for(int i = 0; i < numOfThreads; i++){
+                int finalI = i;
+                int finalStartingNonce = startingNonce;
+                threads[finalI] = new Thread(() -> {
+                    int localNonce = finalStartingNonce;
+                    String currentHash;
+                    boolean found = false;
+                    int limit = finalStartingNonce + noncesPerThread;
+
+                    for(; localNonce < limit; localNonce++){
+                        currentHash = calculateBlockHash(localNonce);
+                        threadNonces[finalI] = localNonce;
+                        if(currentHash.substring(0,prefix).equals(prefixString)){
+                            threadHashes[finalI] = currentHash;
+                            threadNonces[finalI] = localNonce;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if(!found){
+                        threadNonces[finalI] = -1;
+                    }
+                });
+                startingNonce += noncesPerThread;
+            }
+            for(Thread thread : threads){
+                thread.start();
+            }
+            for(Thread thread : threads){
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            //countDownLatch.await();
+            for(int i = 0; i < numOfThreads; i++){
+                if(threadNonces[i] > -1){
+                    nonce = threadNonces[i];
+                    hash = threadHashes[i];
+                    hashIsValid = true;
+                    break;
+                }
+            }
         }
         return hash;
     }
