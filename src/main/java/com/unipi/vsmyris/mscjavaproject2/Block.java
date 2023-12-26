@@ -47,7 +47,7 @@ public class Block {
 
     public String mineBlock(int prefix){
         String prefixString = new String(new char[prefix]).replace('\0','0');
-        int numOfThreads = 4;
+        int numOfThreads = 6;
         boolean hashIsValid = hash.substring(0,prefix).equals(prefixString);
         String[] threadHashes = new String[numOfThreads];
         int[] threadNonces = new int[numOfThreads];
