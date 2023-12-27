@@ -83,6 +83,7 @@ public class Block {
                 }
                 countDownLatch.await();
             }
+            executorService.shutdown();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
